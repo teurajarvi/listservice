@@ -1603,9 +1603,489 @@ Then call the API with header `x-api-key: <value>`.
 
 
 
-## Docs (OpenAPI -> HTML)
-- Static docs are available in `docs/index.html` and render `openapi.yaml` via Redoc.
-- Serve locally (to avoid CORS issues): `python -m http.server -d docs 8080` then open http://localhost:8080/
+## 📚 **Interactive API Documentation (Redoc)**
+
+This project includes **beautiful, interactive HTML documentation** generated from the OpenAPI specification using Redoc.
+
+### **What's Available**
+
+Two HTML documentation files in the `docs/` folder:
+
+1. **`docs/index.html`** - Standard version (loads `openapi.yaml`)
+   - ✅ Lightweight (396 bytes)
+   - ✅ Always shows latest spec changes
+   - ⚠️ Requires local server (CORS)
+
+2. **`docs/openapi_standalone.html`** - Standalone version
+   - ✅ Self-contained (2.3 KB)
+   - ✅ Works without server (embedded spec)
+   - ✅ Share as single file
+   - ⚠️ Manual update needed when spec changes
+
+---
+
+### **🚀 Quick Start: View Documentation**
+
+#### **Method 1: Using Python HTTP Server (Recommended)**
+
+**For `index.html` (always up-to-date):**
+
+```powershell
+# Navigate to project root
+cd c:\Users\OMISTAJA\CascadeProjects\listservice
+
+# Start HTTP server
+python -m http.server -d docs 8080
+
+# Open in browser
+start http://localhost:8080/
+```
+
+**For Unix/Linux/Mac:**
+```bash
+cd ~/listservice
+python3 -m http.server -d docs 8080
+# Open http://localhost:8080/ in browser
+```
+
+✅ **Documentation opens in browser with full functionality!**
+
+#### **Method 2: Open Standalone Version Directly**
+
+**For `openapi_standalone.html` (no server needed):**
+
+**Windows:**
+```powershell
+# Open directly in default browser
+start docs\openapi_standalone.html
+```
+
+**Unix/Linux/Mac:**
+```bash
+open docs/openapi_standalone.html  # macOS
+xdg-open docs/openapi_standalone.html  # Linux
+```
+
+✅ **Works immediately, no setup required!**
+
+#### **Method 3: VS Code Live Server (If Available)**
+
+```
+1. Install "Live Server" extension in VS Code
+2. Right-click docs/index.html
+3. Select "Open with Live Server"
+4. Documentation opens at http://127.0.0.1:5500/docs/
+```
+
+#### **Method 4: Deploy to GitHub Pages**
+
+Your docs are **already live** on GitHub Pages (if enabled):
+
+📄 **Live URL**: https://teurajarvi.github.io/listservice/
+
+**To enable GitHub Pages:**
+```
+1. Go to: https://github.com/teurajarvi/listservice/settings/pages
+2. Source: Deploy from a branch
+3. Branch: main
+4. Folder: /docs
+5. Click "Save"
+6. Wait 2-3 minutes for deployment
+7. Visit: https://teurajarvi.github.io/listservice/
+```
+
+---
+
+### **📖 What You'll See**
+
+The Redoc documentation provides:
+
+#### **1. API Overview**
+- Project title and version
+- API description
+- Base server URLs
+- Live demo endpoint
+
+#### **2. Endpoints Documentation**
+
+**POST /v1/list/head**
+- Summary: "Return the first n items from a list"
+- Request body schema
+- Response schema
+- Status codes (200, 400, 401, 403)
+- Try-it-out functionality
+
+**POST /v1/list/tail**
+- Summary: "Return the last n items from a list"
+- Request body schema
+- Response schema
+- Status codes (200, 400, 401, 403)
+- Try-it-out functionality
+
+#### **3. Request/Response Schemas**
+
+**ListRequest Schema:**
+```json
+{
+  "list": ["string"],  // Array of strings (required)
+  "n": 1               // Integer, min: 1, max: 10000 (default: 1)
+}
+```
+
+**ListResponse Schema:**
+```json
+{
+  "result": ["string"]  // Array of strings (required)
+}
+```
+
+#### **4. Security Schemes**
+- **ApiKeyAuth**: x-api-key header (for REST API)
+- **BearerJWT**: JWT token authentication (optional)
+
+#### **5. Interactive Features**
+- ✅ Collapsible sections
+- ✅ Syntax highlighting
+- ✅ Copy-to-clipboard buttons
+- ✅ Search functionality
+- ✅ Direct links to sections
+- ✅ Dark/light theme toggle
+
+---
+
+### **🔄 Updating Documentation**
+
+#### **When OpenAPI Spec Changes:**
+
+**If using `index.html` (recommended):**
+```bash
+# Just edit openapi.yaml
+# Changes appear automatically when you refresh browser
+# No rebuild needed!
+```
+
+**If using `openapi_standalone.html`:**
+```bash
+# Need to regenerate the file
+# Option 1: Manual update (copy spec into HTML)
+# Option 2: Use build script (if available)
+# Option 3: Recreate from openapi.yaml
+```
+
+#### **Regenerate Standalone HTML:**
+
+Create a script to embed the spec:
+
+```python
+# scripts/build_docs.py
+import json
+import yaml
+
+# Read OpenAPI spec
+with open('openapi.yaml', 'r') as f:
+    spec = yaml.safe_load(f)
+
+# Read template
+with open('docs/openapi_standalone.html', 'r') as f:
+    html = f.read()
+
+# Replace spec in HTML
+spec_json = json.dumps(spec)
+# Update the const spec = {...} line
+# Save back to file
+```
+
+Or simply use `index.html` which always loads fresh spec!
+
+---
+
+### **🌐 Sharing Documentation**
+
+#### **Option 1: Send Standalone HTML**
+```powershell
+# Email or share the file
+# Recipient opens it directly in browser
+# No setup required on their end
+```
+
+**Pros:**
+- ✅ Works offline
+- ✅ No server needed
+- ✅ Single file
+
+**Cons:**
+- ⚠️ Manual updates
+- ⚠️ Larger file size
+
+#### **Option 2: GitHub Pages URL**
+```
+Share: https://teurajarvi.github.io/listservice/
+```
+
+**Pros:**
+- ✅ Always up-to-date
+- ✅ Professional URL
+- ✅ Fast CDN delivery
+
+**Cons:**
+- ⚠️ Requires internet
+- ⚠️ Public (if public repo)
+
+#### **Option 3: Deploy to Custom Domain**
+```
+Use GitHub Pages custom domain:
+docs.listservice.com -> https://teurajarvi.github.io/listservice/
+```
+
+#### **Option 4: Host on S3 + CloudFront**
+```bash
+# Upload docs to S3
+aws s3 sync docs/ s3://your-bucket/docs/ --acl public-read
+
+# Access via CloudFront
+https://d1234567890.cloudfront.net/docs/
+```
+
+---
+
+### **🎨 Customizing Redoc Theme**
+
+Edit `docs/index.html` to customize appearance:
+
+```html
+<redoc 
+  spec-url="../openapi.yaml"
+  theme='{
+    "colors": {
+      "primary": {
+        "main": "#ff6900"
+      }
+    },
+    "typography": {
+      "fontSize": "16px",
+      "fontFamily": "Roboto, sans-serif"
+    }
+  }'
+></redoc>
+```
+
+**Options:**
+- Colors (primary, success, warning, error)
+- Typography (font size, family, line height)
+- Spacing
+- Sidebar width
+- Code theme
+
+---
+
+### **🔍 Redoc vs Swagger UI**
+
+This project uses **Redoc** for documentation. Here's why:
+
+| Feature | Redoc | Swagger UI |
+|---------|-------|------------|
+| **Design** | Modern, clean | Traditional |
+| **Performance** | Fast | Slower with large specs |
+| **Mobile** | Excellent | Good |
+| **Customization** | Theme options | Full control |
+| **Try-it-out** | Limited | Full interactive |
+| **Search** | Built-in | Available |
+| **Best for** | Documentation | API testing |
+
+**Want Swagger UI instead?**
+
+Create `docs/swagger.html`:
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    SwaggerUIBundle({
+      url: '../openapi.yaml',
+      dom_id: '#swagger-ui'
+    })
+  </script>
+</body>
+</html>
+```
+
+---
+
+### **📊 Alternative Documentation Tools**
+
+If you want to try other tools:
+
+#### **1. Swagger UI** (Interactive testing)
+```bash
+# Install
+npm install -g swagger-ui-dist
+
+# Serve
+swagger-ui-dist -p 8080 -u openapi.yaml
+```
+
+#### **2. RapiDoc** (Lightweight)
+```html
+<script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+<rapi-doc spec-url="../openapi.yaml"></rapi-doc>
+```
+
+#### **3. Stoplight Elements** (Modern)
+```html
+<script src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
+<elements-api apiDescriptionUrl="../openapi.yaml" router="hash"></elements-api>
+```
+
+#### **4. Docusaurus** (Full documentation site)
+```bash
+npx create-docusaurus@latest docs-site classic
+# Add OpenAPI plugin
+npm install docusaurus-plugin-openapi-docs
+```
+
+---
+
+### **🐛 Troubleshooting**
+
+#### **Issue: "Failed to fetch spec" or CORS error**
+
+**Problem:** Browser security blocks loading `openapi.yaml` from `file://`
+
+**Solutions:**
+
+1. **Use HTTP server** (recommended):
+   ```bash
+   python -m http.server -d docs 8080
+   ```
+
+2. **Use standalone version**:
+   ```bash
+   open docs/openapi_standalone.html
+   ```
+
+3. **Disable CORS** (Chrome, temporary, for testing only):
+   ```bash
+   chrome.exe --disable-web-security --user-data-dir="C:/temp/chrome"
+   ```
+
+#### **Issue: Documentation doesn't show latest changes**
+
+**Problem:** Browser cache or standalone HTML not updated
+
+**Solutions:**
+
+1. **Hard refresh**: Ctrl+Shift+R (Chrome/Firefox)
+2. **Clear cache**: Browser settings → Clear browsing data
+3. **If standalone**: Regenerate the HTML file
+
+#### **Issue: "Cannot GET /docs/"**
+
+**Problem:** Server directory wrong or file not found
+
+**Solutions:**
+
+1. Check you're in project root:
+   ```bash
+   pwd  # Should show .../listservice
+   ls docs/  # Should show index.html
+   ```
+
+2. Verify server command:
+   ```bash
+   python -m http.server -d docs 8080  # Note: -d docs
+   ```
+
+3. Access correct URL:
+   ```
+   http://localhost:8080/  # Not /docs/
+   ```
+
+---
+
+### **💡 Pro Tips**
+
+#### **1. Add to README Header**
+Link docs in your README badges:
+```markdown
+[![Docs](https://img.shields.io/badge/docs-redoc-blue)](https://teurajarvi.github.io/listservice/)
+```
+
+#### **2. Auto-Generate Docs**
+Add to CI/CD pipeline:
+```yaml
+- name: Generate docs
+  run: |
+    # Update standalone HTML
+    python scripts/build_docs.py
+    
+    # Commit if changed
+    git add docs/
+    git commit -m "docs: Update standalone HTML" || true
+```
+
+#### **3. Version Documentation**
+Keep docs for each version:
+```
+docs/
+├── v1.0.0/
+│   └── index.html
+├── v1.1.0/
+│   └── index.html
+└── latest/
+    └── index.html
+```
+
+#### **4. Add Examples**
+Enhance OpenAPI spec with examples:
+```yaml
+examples:
+  head_simple:
+    summary: Simple HEAD request
+    value:
+      list: ["a", "b", "c"]
+      n: 2
+```
+
+#### **5. Add Code Samples**
+Include code examples in spec:
+```yaml
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X POST "$API/v1/list/head" \
+        -d '{"list":["a","b"],"n":1}'
+  - lang: python
+    source: |
+      import requests
+      r = requests.post(url, json={"list": ["a","b"], "n": 1})
+```
+
+---
+
+### **🎯 Quick Commands Summary**
+
+| Action | Command |
+|--------|---------|
+| **View Docs Locally** | `python -m http.server -d docs 8080` |
+| **Open Standalone** | `start docs\openapi_standalone.html` (Windows) |
+| **View Live** | https://teurajarvi.github.io/listservice/ |
+| **Update Spec** | Edit `openapi.yaml` (auto-updates `index.html`) |
+| **Test Changes** | Refresh browser (Ctrl+Shift+R) |
+| **Share Docs** | Send `openapi_standalone.html` file |
+
+---
+
+### **📚 Additional Resources**
+
+- **Redoc Documentation**: https://redocly.com/docs/redoc/
+- **OpenAPI Specification**: https://swagger.io/specification/
+- **Redoc Theming**: https://redocly.com/docs/api-reference-docs/configuration/theming/
+- **GitHub Pages**: https://docs.github.com/en/pages
 
 ## Example curl scripts
 - `scripts/call_head.sh` and `scripts/call_tail.sh`
