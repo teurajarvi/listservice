@@ -1,10 +1,12 @@
 # ListService (Serverless, AWS, Terraform, Python)
 
+[![CI](https://github.com/teurajarvi/listservice/actions/workflows/ci.yml/badge.svg)](https://github.com/teurajarvi/listservice/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-14%2F14%20passing-brightgreen)](src/tests/)
 [![Terraform](https://img.shields.io/badge/terraform-validated-purple)](infra/)
 [![AWS](https://img.shields.io/badge/AWS-Lambda%20%7C%20API%20Gateway-orange)](https://aws.amazon.com/)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![GitHub](https://img.shields.io/badge/github-teurajarvi%2Flistservice-blue?logo=github)](https://github.com/teurajarvi/listservice)
 
 ---
 
@@ -28,7 +30,7 @@ This project is a **complete implementation** of the following requirements spec
 
 **All requirements met and exceeded.** This implementation includes additional production-ready features:
 - 14 automated tests (all passing)
-- CI/CD pipelines (GitHub Actions)
+- CI/CD pipelines (4 GitHub Actions workflows: CI, PR Plan, Deploy, Smoke)
 - Multi-environment support (dev/staging/prod)
 - Monitoring and alarms (CloudWatch)
 - Security features (throttling, optional JWT/WAF)
@@ -134,8 +136,8 @@ Before you begin, ensure you have:
 ### **Step 1️⃣: Clone and Verify the Project**
 
 ```powershell
-# Clone the repository (replace YOUR-USERNAME with your GitHub username)
-git clone https://github.com/YOUR-USERNAME/listservice.git
+# Clone the repository
+git clone https://github.com/teurajarvi/listservice.git
 cd listservice
 
 # Verify project structure
@@ -1282,6 +1284,555 @@ listservice/
 
 ---
 
+## 🔄 **CI/CD Pipeline with GitHub Actions**
+
+This project includes a **comprehensive CI/CD pipeline** using GitHub Actions. Four automated workflows handle testing, deployment, and monitoring.
+
+### **Overview: 4 Automated Workflows**
+
+| Workflow | Trigger | Purpose | Duration |
+|----------|---------|---------|----------|
+| 🧪 **CI** | Auto (push/PR) | Quality gate (tests + validation) | ~2 min |
+| 📋 **PR Plan** | Auto (PR) | Infrastructure change preview | ~2 min |
+| 🚀 **Deploy** | Manual | Controlled deployment to AWS | ~5 min |
+| 🔥 **Smoke** | Manual | Post-deployment API health check | ~30 sec |
+
+---
+
+### **1️⃣ CI Workflow** (`ci.yml`) 🧪
+
+**Automatically runs on every push and pull request.**
+
+#### **What It Does:**
+```yaml
+✅ Checkout code
+✅ Setup Python 3.12
+✅ Install pytest
+✅ Run all 14 tests
+✅ Build Lambda deployment package
+✅ Setup Terraform 1.9.5
+✅ Check Terraform formatting
+✅ Validate Terraform configuration
+```
+
+#### **When It Runs:**
+- Every push to `main` branch
+- Every Pull Request
+- Automatically on commit
+
+#### **Purpose:**
+**Quality Gate** - Ensures code quality before merge:
+- All tests must pass (14/14)
+- Lambda package must build successfully
+- Terraform code must be properly formatted
+- Terraform configuration must be valid
+
+#### **View Results:**
+- GitHub Actions tab: https://github.com/teurajarvi/listservice/actions
+- Green checkmark ✅ = All checks passed
+- Red X ❌ = Something failed
+
+#### **Example Output:**
+```
+Run tests
+✓ test_head_operation PASSED
+✓ test_tail_operation PASSED
+✓ test_n_larger_than_list PASSED
+... (11 more tests)
+✓ 14 passed in 0.08s
+
+Build lambda zip
+✓ Created: build/listservice.zip (2.3 KB)
+
+Terraform validate
+✓ Success! The configuration is valid.
+```
+
+---
+
+### **2️⃣ PR Plan Workflow** (`pr-plan.yml`) 📋
+
+**Automatically runs on Pull Requests and posts Terraform plan as a comment.**
+
+#### **What It Does:**
+```yaml
+✅ Checkout code
+✅ Run tests (ensures quality)
+✅ Build Lambda package
+✅ Setup Terraform
+✅ Run terraform plan
+✅ Post plan output as PR comment
+```
+
+#### **When It Runs:**
+- Automatically on every Pull Request
+- Updates when PR is updated
+
+#### **Purpose:**
+**Infrastructure Change Preview** - Shows what AWS resources would change:
+- Resources to be created (green +)
+- Resources to be modified (yellow ~)
+- Resources to be destroyed (red -)
+
+#### **Example PR Comment:**
+```
+### Terraform Plan (dev)
+
+Terraform will perform the following actions:
+
+  # module.lambda.aws_lambda_function.main will be updated in-place
+  ~ resource "aws_lambda_function" "main" {
+      ~ last_modified    = "2025-10-02T10:30:00Z" -> (known after apply)
+      ~ source_code_hash = "abc123..." -> "def456..."
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+
+Changes to Outputs:
+  ~ lambda_version = "1" -> "2"
+```
+
+#### **Benefits:**
+- ✅ Review infrastructure changes before merge
+- ✅ Catch unintended infrastructure modifications
+- ✅ Team discussion on changes
+- ✅ Prevents surprises in production
+
+---
+
+### **3️⃣ Deploy Workflow** (`deploy.yml`) 🚀
+
+**Manually triggered deployment to AWS environments.**
+
+#### **What It Does:**
+
+**Phase 1 - Plan (Runs for all environments):**
+```yaml
+✅ Run all tests (safety check)
+✅ Build Lambda package
+✅ Terraform plan for dev
+✅ Terraform plan for staging
+✅ Terraform plan for prod
+✅ Upload plan artifacts
+```
+
+**Phase 2 - Apply (Runs for selected environment):**
+```yaml
+✅ Download plan artifacts
+✅ Terraform init
+✅ Terraform apply (with approval)
+✅ Deploy to AWS
+```
+
+#### **When It Runs:**
+- **Manually triggered** from GitHub Actions UI
+- Choose environment: `dev`, `staging`, or `prod`
+
+#### **How to Deploy:**
+
+**Step 1: Trigger Workflow**
+```
+1. Go to: https://github.com/teurajarvi/listservice/actions
+2. Click: "Deploy" workflow
+3. Click: "Run workflow" button
+4. Select: Environment (dev/staging/prod)
+5. Click: "Run workflow"
+```
+
+**Step 2: Review Plan**
+```
+1. Workflow runs and shows plan
+2. Review what will be created/changed/destroyed
+3. If prod: Manual approval required
+```
+
+**Step 3: Apply Executes**
+```
+1. After approval, terraform apply runs
+2. Infrastructure is deployed to AWS
+3. New API endpoint is created/updated
+```
+
+#### **Environment Strategy:**
+- **dev**: No approval needed, fast iteration
+- **staging**: 1 reviewer approval recommended
+- **prod**: 2+ reviewers approval, main branch only
+
+#### **Safety Features:**
+- ✅ Tests run before deployment
+- ✅ Plan reviewed before apply
+- ✅ Manual approval for production
+- ✅ Matrix strategy for multi-env
+- ✅ Artifact upload for audit
+
+#### **Required GitHub Secrets:**
+Set these in: Repository Settings → Secrets → Actions
+```
+AWS_ACCESS_KEY_ID       = Your IAM user access key
+AWS_SECRET_ACCESS_KEY   = Your IAM user secret key
+AWS_REGION              = eu-north-1 (or your region)
+```
+
+---
+
+### **4️⃣ Smoke Test Workflow** (`smoke.yml`) 🔥
+
+**Manually triggered API health check after deployment.**
+
+#### **What It Does:**
+```yaml
+✅ Find API endpoint from Terraform outputs
+✅ Auto-detect HTTP API or REST API
+✅ Test HEAD endpoint: POST /v1/list/head
+✅ Test TAIL endpoint: POST /v1/list/tail
+✅ Verify JSON responses
+✅ Report results
+```
+
+#### **When It Runs:**
+- **Manually triggered** after deployment
+- Run after Deploy workflow completes
+- Can be run anytime to verify API health
+
+#### **How to Run Smoke Tests:**
+```
+1. Go to: GitHub Actions tab
+2. Click: "Smoke" workflow
+3. Click: "Run workflow"
+4. Select: Branch (usually main)
+5. Click: "Run workflow"
+```
+
+#### **Test Scenarios:**
+```bash
+# Test 1: HEAD Operation
+curl -X POST "$API_ENDPOINT/v1/list/head" \
+  -H "Content-Type: application/json" \
+  -d '{"list":["a","b","c"],"n":2}'
+
+Expected: {"result":["a","b"]}
+
+# Test 2: TAIL Operation  
+curl -X POST "$API_ENDPOINT/v1/list/tail" \
+  -H "Content-Type: application/json" \
+  -d '{"list":["a","b","c"],"n":2}'
+
+Expected: {"result":["b","c"]}
+```
+
+#### **Smart Endpoint Discovery:**
+The workflow automatically:
+1. Checks for HTTP API endpoint (`api_endpoint` output)
+2. Falls back to REST API endpoint (`rest_invoke_url` output)
+3. Adds API key header if REST API is used
+4. Fails gracefully if no endpoint found
+
+#### **When to Use:**
+- ✅ After every deployment
+- ✅ After infrastructure changes
+- ✅ Before announcing new features
+- ✅ During troubleshooting
+- ✅ For monitoring/alerting verification
+
+---
+
+## 🔄 **Complete CI/CD Flow Example**
+
+### **Scenario: Adding a New Feature**
+
+```
+Step 1: Development
+├─ Create feature branch: git checkout -b feature/new-operation
+├─ Make code changes
+├─ Run tests locally: make test
+└─ Commit: git commit -m "feat: add reverse operation"
+
+Step 2: Create Pull Request
+├─ Push branch: git push origin feature/new-operation
+├─ Open Pull Request on GitHub
+├─ 🧪 CI Workflow runs automatically
+│  ├─ Runs 14 tests ✅
+│  ├─ Builds Lambda package ✅
+│  └─ Validates Terraform ✅
+├─ 📋 PR Plan Workflow runs automatically
+│  ├─ Shows infrastructure changes
+│  └─ Posts Terraform plan as comment
+└─ Team reviews code and infrastructure changes
+
+Step 3: Merge to Main
+├─ Approve and merge PR
+├─ 🧪 CI Workflow runs again on main
+└─ Code is now in main branch
+
+Step 4: Deploy to Dev
+├─ Trigger 🚀 Deploy Workflow manually
+├─ Select environment: dev
+├─ Tests run ✅
+├─ Terraform plan shows changes
+└─ Terraform apply deploys to AWS
+
+Step 5: Verify Deployment
+├─ Trigger 🔥 Smoke Test Workflow
+├─ HEAD endpoint tested ✅
+├─ TAIL endpoint tested ✅
+└─ API is working!
+
+Step 6: Deploy to Production
+├─ Trigger 🚀 Deploy Workflow
+├─ Select environment: prod
+├─ Manual approval required
+├─ Team lead approves
+├─ Terraform apply deploys to prod
+└─ Run smoke tests to verify
+```
+
+---
+
+## 📊 **Workflow Status Badges**
+
+Add these to your README to show live workflow status:
+
+```markdown
+[![CI](https://github.com/teurajarvi/listservice/actions/workflows/ci.yml/badge.svg)](https://github.com/teurajarvi/listservice/actions/workflows/ci.yml)
+[![Deploy](https://github.com/teurajarvi/listservice/actions/workflows/deploy.yml/badge.svg)](https://github.com/teurajarvi/listservice/actions/workflows/deploy.yml)
+```
+
+Result: 
+- ![CI](https://img.shields.io/badge/CI-passing-brightgreen) ← Live status
+- ![Deploy](https://img.shields.io/badge/Deploy-success-blue) ← Last deploy
+
+---
+
+## 🛡️ **Branch Protection Rules (Recommended)**
+
+Configure in: Repository Settings → Branches → Add rule
+
+**For `main` branch:**
+```yaml
+Branch protection rules:
+☑ Require a pull request before merging
+  ☑ Require approvals: 1
+☑ Require status checks to pass before merging
+  ☑ Require branches to be up to date
+  ☑ Status checks: 
+      - build-test-validate (from CI workflow)
+☑ Require conversation resolution before merging
+☑ Do not allow bypassing the above settings
+```
+
+**Benefits:**
+- ✅ No direct commits to main
+- ✅ All code reviewed before merge
+- ✅ All tests must pass
+- ✅ Terraform must be valid
+- ✅ Infrastructure changes visible
+
+---
+
+## 🔧 **Workflow Customization**
+
+### **Changing Terraform Version:**
+Edit in workflow files:
+```yaml
+- uses: hashicorp/setup-terraform@v3
+  with:
+    terraform_version: 1.9.5  # ← Change this
+```
+
+### **Changing Python Version:**
+```yaml
+- uses: actions/setup-python@v5
+  with:
+    python-version: '3.12'  # ← Change this
+```
+
+### **Adding More Environments:**
+Edit `deploy.yml`:
+```yaml
+strategy:
+  matrix:
+    environment: [dev, stage, prod, qa]  # ← Add new envs
+```
+
+### **Customizing Test Commands:**
+Edit test step:
+```yaml
+- name: Run tests
+  run: |
+    make test                    # All tests
+    make test-integration        # Integration tests
+    make test-coverage           # With coverage report
+```
+
+---
+
+## 📈 **Monitoring Workflow Health**
+
+### **View All Workflow Runs:**
+```
+GitHub → Actions tab
+├─ See all recent runs
+├─ Filter by workflow
+├─ Filter by status (success/failure)
+└─ Download logs
+```
+
+### **Get Notified:**
+GitHub sends notifications when:
+- ✅ Workflow succeeds (optional)
+- ❌ Workflow fails (default)
+- ⏸️ Workflow needs approval
+
+### **Workflow Insights:**
+```
+GitHub → Insights → Actions
+├─ Workflow run time trends
+├─ Success/failure rates
+└─ Billable time (if applicable)
+```
+
+---
+
+## 🎯 **CI/CD Best Practices Used**
+
+This pipeline demonstrates industry best practices:
+
+1. ✅ **Shift Left Testing** - Tests run early and often
+2. ✅ **Infrastructure as Code** - All infra changes via Terraform
+3. ✅ **GitOps** - All changes through Git
+4. ✅ **Immutable Deployments** - Lambda package rebuilt every time
+5. ✅ **Environment Parity** - Same code deploys to all envs
+6. ✅ **Automated Testing** - No manual test steps
+7. ✅ **Change Preview** - See changes before applying
+8. ✅ **Manual Approval Gates** - Human oversight for prod
+9. ✅ **Smoke Testing** - Post-deployment verification
+10. ✅ **Audit Trail** - All deployments logged in GitHub
+
+---
+
+## 🚀 **Getting Started with CI/CD**
+
+### **First Time Setup:**
+
+**1. Ensure Tests Pass Locally:**
+```powershell
+python -m pytest src/tests/ -v
+# All 14 tests should pass
+```
+
+**2. Verify Terraform Works:**
+```powershell
+cd infra
+terraform init
+terraform validate
+# Should show: Success!
+```
+
+**3. Push to GitHub:**
+```powershell
+git push origin main
+# CI workflow will run automatically
+```
+
+**4. Check Workflow Results:**
+```
+1. Go to GitHub repository
+2. Click "Actions" tab
+3. See your CI workflow running
+4. Wait for green checkmark ✅
+```
+
+**5. Try a Deployment (Optional):**
+```
+1. Go to Actions tab
+2. Click "Deploy" workflow
+3. Click "Run workflow"
+4. Select "dev" environment
+5. Watch it deploy!
+```
+
+### **Daily Usage:**
+
+**Making Changes:**
+```bash
+1. Create feature branch
+2. Make changes
+3. Commit and push
+4. CI runs automatically
+5. Create Pull Request
+6. PR Plan shows Terraform changes
+7. Review and merge
+8. Deploy when ready
+```
+
+**Deploying:**
+```bash
+1. Merge to main (CI passes ✅)
+2. Trigger Deploy workflow
+3. Select environment
+4. Review plan
+5. Approve if prod
+6. Run smoke tests
+7. Done! 🎉
+```
+
+---
+
+## 💡 **Troubleshooting CI/CD**
+
+### **CI Workflow Fails - Tests:**
+```
+Problem: Tests fail in CI but pass locally
+Solution:
+1. Check Python version matches (3.12)
+2. Check for environment-specific issues
+3. Review test logs in GitHub Actions
+4. Run: python -m pytest src/tests/ -v --tb=short
+```
+
+### **CI Workflow Fails - Terraform:**
+```
+Problem: Terraform validation fails
+Solution:
+1. Run locally: terraform fmt -recursive
+2. Run locally: terraform validate
+3. Fix any errors
+4. Commit and push
+```
+
+### **Deploy Workflow Fails:**
+```
+Problem: Deployment fails
+Solution:
+1. Check AWS credentials in GitHub Secrets
+2. Verify IAM permissions
+3. Review Terraform error in logs
+4. Check if Lambda package was built
+5. Verify environment name matches tfvars file
+```
+
+### **Smoke Tests Fail:**
+```
+Problem: API endpoints don't respond
+Solution:
+1. Check if deployment completed
+2. Verify API endpoint exists: terraform output api_endpoint
+3. Check Lambda logs: aws logs tail /aws/lambda/listservice-dev-handler
+4. Verify API Gateway configuration
+5. Check throttling limits
+```
+
+---
+
+## 📚 **Additional Resources**
+
+- **GitHub Actions Docs**: https://docs.github.com/en/actions
+- **Terraform in CI/CD**: https://developer.hashicorp.com/terraform/tutorials/automation
+- **Workflow Syntax**: https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+- **Secrets Management**: https://docs.github.com/en/actions/security-guides/encrypted-secrets
+
+---
+
 ## 🔍 Troubleshooting
 
 ### Terraform Validation Errors
@@ -1850,7 +2401,7 @@ CloudWatch Alarms → SNS (Notifications)
 This implementation goes beyond the minimum requirements:
 
 1. ✅ **Testing**: 14 automated tests (not required)
-2. ✅ **CI/CD**: GitHub Actions workflows (not required)
+2. ✅ **CI/CD**: 4 GitHub Actions workflows - CI, PR Plan, Deploy, Smoke (not required)
 3. ✅ **Monitoring**: CloudWatch alarms + SNS (not required)
 4. ✅ **Multi-environment**: dev/staging/prod support (not required)
 5. ✅ **Security**: Throttling, optional JWT/WAF (not required)
