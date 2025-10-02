@@ -1,0 +1,63 @@
+name: Sync OpenAPI Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'openapi.yaml'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if sync is needed
+        id: check
+        run: |
+          if cmp -s openapi.yaml docs/openapi.yaml; then
+            echo "Files are identical, no sync needed"
+            echo "sync_needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "Files differ, sync needed"
+            echo "sync_needed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Sync openapi.yaml to docs/
+        if: steps.check.outputs.sync_needed == 'true'
+        run: |
+          cp openapi.yaml docs/openapi.yaml
+          echo "✅ Synced openapi.yaml to docs/ folder"
+
+      - name: Commit changes
+        if: steps.check.outputs.sync_needed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/openapi.yaml
+          git commit -m "docs: Auto-sync openapi.yaml to docs/ [skip ci]"
+          git push
+
+      - name: Summary
+        if: steps.check.outputs.sync_needed == 'true'
+        run: |
+          echo "### ✅ OpenAPI Spec Synced" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📄 **File**: \`openapi.yaml\` → \`docs/openapi.yaml\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 **GitHub Pages** will update in 2-3 minutes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Live URL**: https://teurajarvi.github.io/listservice/" >> $GITHUB_STEP_SUMMARY
+
+      - name: Summary (No Sync)
+        if: steps.check.outputs.sync_needed == 'false'
+        run: |
+          echo "### ℹ️ No Sync Needed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Files are already in sync. No changes made." >> $GITHUB_STEP_SUMMARY

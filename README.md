@@ -1765,6 +1765,49 @@ OpenAPI spec exists in **two locations**:
 
 **When you update the spec:**
 
+#### **Option 1: Automatic Sync (Recommended) 🤖**
+
+Simply edit and push the root `openapi.yaml`:
+
+```powershell
+# 1. Edit the root openapi.yaml
+code openapi.yaml
+
+# 2. Commit and push (only root file)
+git add openapi.yaml
+git commit -m "docs: Update OpenAPI spec"
+git push
+```
+
+✅ **GitHub Actions automatically syncs to `docs/openapi.yaml`!**
+
+The workflow runs when:
+- ✅ You push changes to `openapi.yaml`
+- ✅ You manually trigger "Sync OpenAPI Docs" workflow
+
+**View workflow:** https://github.com/teurajarvi/listservice/actions/workflows/sync-docs.yml
+
+---
+
+#### **Option 2: Manual Sync with Makefile**
+
+Use the `make sync-docs` command:
+
+```bash
+# 1. Edit openapi.yaml
+# 2. Run sync command
+make sync-docs
+
+# 3. Commit both files
+git add openapi.yaml docs/openapi.yaml
+git commit -m "docs: Update OpenAPI spec"
+git push
+```
+
+---
+
+#### **Option 3: Manual Copy (Windows)**
+
 ```powershell
 # 1. Edit the root openapi.yaml
 # 2. Copy to docs folder
@@ -1776,7 +1819,10 @@ git commit -m "docs: Update OpenAPI spec"
 git push
 ```
 
-**For Unix/Linux/Mac:**
+---
+
+#### **Option 4: Manual Copy (Unix/Linux/Mac)**
+
 ```bash
 cp openapi.yaml docs/openapi.yaml
 git add openapi.yaml docs/openapi.yaml
@@ -2335,9 +2381,9 @@ listservice/
 
 ## 🔄 **CI/CD Pipeline with GitHub Actions**
 
-This project includes a **comprehensive CI/CD pipeline** using GitHub Actions. Four automated workflows handle testing, deployment, and monitoring.
+This project includes a **comprehensive CI/CD pipeline** using GitHub Actions. Five automated workflows handle testing, deployment, monitoring, and documentation.
 
-### **Overview: 4 Automated Workflows**
+### **Overview: 5 Automated Workflows**
 
 | Workflow | Trigger | Purpose | Duration |
 |----------|---------|---------|----------|
@@ -2345,6 +2391,7 @@ This project includes a **comprehensive CI/CD pipeline** using GitHub Actions. F
 | 📋 **PR Plan** | Auto (PR) | Infrastructure change preview | ~2 min |
 | 🚀 **Deploy** | Manual | Controlled deployment to AWS | ~5 min |
 | 🔥 **Smoke** | Manual | Post-deployment API health check | ~30 sec |
+| 📚 **Sync Docs** | Auto (openapi.yaml push) | Sync spec to docs/ for GitHub Pages | ~10 sec |
 
 ---
 
@@ -2582,6 +2629,93 @@ The workflow automatically:
 - ✅ Before announcing new features
 - ✅ During troubleshooting
 - ✅ For monitoring/alerting verification
+
+---
+
+### **5️⃣ Sync Docs Workflow** (`sync-docs.yml`) 📚
+
+**Automatically syncs OpenAPI spec to docs/ folder for GitHub Pages.**
+
+#### **What It Does:**
+```yaml
+✅ Checkout code
+✅ Compare openapi.yaml files (root vs docs/)
+✅ Copy root openapi.yaml to docs/ if different
+✅ Auto-commit and push changes
+✅ Display sync summary
+```
+
+#### **When It Runs:**
+- Automatically when `openapi.yaml` in root is pushed to `main`
+- Manually via "Run workflow" button in GitHub Actions
+
+#### **Purpose:**
+**Documentation Automation** - Keeps GitHub Pages in sync:
+- Root `openapi.yaml` is source of truth
+- Automatically copies to `docs/openapi.yaml`
+- GitHub Pages updates within 2-3 minutes
+- No manual sync needed!
+
+#### **How It Works:**
+
+**Step 1: Edit OpenAPI Spec**
+```bash
+# Just edit root file
+code openapi.yaml
+
+# Commit and push
+git add openapi.yaml
+git commit -m "docs: Update API spec"
+git push
+```
+
+**Step 2: Workflow Runs Automatically**
+```
+1. Detects openapi.yaml change
+2. Compares root vs docs/ version
+3. If different, copies root → docs/
+4. Commits with message: "docs: Auto-sync openapi.yaml to docs/ [skip ci]"
+5. Pushes to main (triggers GitHub Pages rebuild)
+```
+
+**Step 3: GitHub Pages Updates**
+```
+- GitHub Pages detects docs/ folder change
+- Rebuilds documentation site
+- Live docs update in 2-3 minutes
+```
+
+#### **View Results:**
+- GitHub Actions tab: https://github.com/teurajarvi/listservice/actions/workflows/sync-docs.yml
+- Workflow run summary shows:
+  - ✅ Files synced (if different)
+  - ℹ️ No sync needed (if identical)
+  - 🔗 Link to live GitHub Pages
+
+#### **Benefits:**
+- ✅ **Zero manual work** - Just edit and push
+- ✅ **Always in sync** - No forgotten copies
+- ✅ **Fast** - Completes in ~10 seconds
+- ✅ **Smart** - Only syncs if files differ
+- ✅ **Safe** - Includes `[skip ci]` to avoid loops
+
+#### **Manual Trigger:**
+
+If you need to force a sync:
+```
+1. Go to: https://github.com/teurajarvi/listservice/actions/workflows/sync-docs.yml
+2. Click "Run workflow" button
+3. Select branch: main
+4. Click "Run workflow"
+```
+
+#### **Workflow Configuration:**
+
+The workflow uses:
+- **Permissions**: `contents: write` (to commit changes)
+- **Trigger paths**: Only runs when `openapi.yaml` changes
+- **Bot commit**: Uses `github-actions[bot]` identity
+- **Skip CI tag**: `[skip ci]` prevents infinite loops
 
 ---
 
