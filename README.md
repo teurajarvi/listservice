@@ -558,6 +558,548 @@ Only POST method is supported.
 
 ---
 
+## 📮 **Testing with Postman**
+
+This project includes a **ready-to-use Postman collection** for easy API testing. No manual request setup needed!
+
+### **What's Included**
+
+The `postman_collection.json` file contains:
+- ✅ **2 pre-configured requests** (HEAD and TAIL operations)
+- ✅ **Environment variables** for easy endpoint switching
+- ✅ **Optional API Key authentication** (for REST API with authentication)
+- ✅ **Sample request bodies** with proper JSON format
+
+---
+
+### **🚀 Quick Start: Import Collection**
+
+#### **Step 1: Download/Clone Repository**
+
+If you haven't already:
+```bash
+git clone https://github.com/teurajarvi/listservice.git
+cd listservice
+```
+
+The collection file is at: `postman_collection.json`
+
+#### **Step 2: Import into Postman**
+
+**Option A: Import from File**
+```
+1. Open Postman
+2. Click "Import" button (top left)
+3. Click "Upload Files"
+4. Select "postman_collection.json"
+5. Click "Import"
+```
+
+**Option B: Import from URL**
+```
+1. Open Postman
+2. Click "Import" button
+3. Select "Link" tab
+4. Paste: https://raw.githubusercontent.com/teurajarvi/listservice/main/postman_collection.json
+5. Click "Continue" → "Import"
+```
+
+✅ **Collection imported!** You'll see "ListService API" in your Collections.
+
+---
+
+### **⚙️ Configuration: Set Environment Variables**
+
+#### **Step 1: Create Environment**
+
+```
+1. Click "Environments" in left sidebar
+2. Click "+" (Create Environment)
+3. Name: "ListService Dev"
+4. Add variables:
+```
+
+| Variable | Initial Value | Current Value |
+|----------|--------------|---------------|
+| `BASE_URL` | `https://uvynvd8xfe.execute-api.eu-north-1.amazonaws.com/dev` | (same) |
+| `API_KEY` | (leave empty for HTTP API) | (leave empty) |
+
+**For the live demo endpoint:**
+```
+BASE_URL = https://uvynvd8xfe.execute-api.eu-north-1.amazonaws.com/dev
+```
+
+**For your own deployment:**
+```
+BASE_URL = https://YOUR_API_ID.execute-api.eu-north-1.amazonaws.com/dev
+```
+
+Get your endpoint from Terraform:
+```bash
+cd infra
+terraform output api_endpoint
+```
+
+#### **Step 2: Activate Environment**
+
+```
+1. Click environment dropdown (top right)
+2. Select "ListService Dev"
+3. ✅ Environment is now active
+```
+
+---
+
+### **🧪 Running Tests**
+
+#### **Test 1: HEAD Operation**
+
+Returns the first `n` elements from a list.
+
+```
+1. Open "ListService API" collection
+2. Click "Head" request
+3. Review the request:
+   - Method: POST
+   - URL: {{BASE_URL}}/v1/list/head
+   - Body: {"list": ["a", "b", "c"], "n": 2}
+4. Click "Send"
+```
+
+**Expected Response:**
+```json
+{
+  "result": ["a", "b"]
+}
+```
+
+**Status Code:** `200 OK`
+
+#### **Test 2: TAIL Operation**
+
+Returns the last `n` elements from a list.
+
+```
+1. Click "Tail" request
+2. Review the request:
+   - Method: POST
+   - URL: {{BASE_URL}}/v1/list/tail
+   - Body: {"list": ["a", "b", "c"], "n": 2}
+3. Click "Send"
+```
+
+**Expected Response:**
+```json
+{
+  "result": ["b", "c"]
+}
+```
+
+**Status Code:** `200 OK`
+
+---
+
+### **🎨 Customizing Requests**
+
+#### **Change the List**
+
+Edit the request body to test with different data:
+
+```json
+{
+  "list": ["apple", "banana", "cherry", "date", "elderberry"],
+  "n": 3
+}
+```
+
+#### **Change n Value**
+
+Test edge cases:
+
+**Case 1: n larger than list**
+```json
+{
+  "list": ["a", "b"],
+  "n": 10
+}
+```
+Expected: `{"result": ["a", "b"]}` (returns entire list)
+
+**Case 2: n = 1**
+```json
+{
+  "list": ["a", "b", "c"],
+  "n": 1
+}
+```
+Expected: 
+- HEAD: `{"result": ["a"]}`
+- TAIL: `{"result": ["c"]}`
+
+**Case 3: Empty list**
+```json
+{
+  "list": [],
+  "n": 5
+}
+```
+Expected: `{"result": []}` (returns empty)
+
+#### **Test Error Handling**
+
+**Invalid n (negative):**
+```json
+{
+  "list": ["a", "b"],
+  "n": -1
+}
+```
+Expected: `400 Bad Request` with error message
+
+**Missing fields:**
+```json
+{
+  "list": ["a", "b"]
+}
+```
+Expected: `400 Bad Request` (n is required)
+
+**Non-string elements:**
+```json
+{
+  "list": [1, 2, 3],
+  "n": 2
+}
+```
+Expected: `400 Bad Request` (list must contain only strings)
+
+---
+
+### **🔐 Using API Key Authentication (REST API Only)**
+
+If you're using the REST API with API Keys:
+
+#### **Step 1: Get API Key**
+
+```bash
+cd infra
+terraform output api_key_value
+```
+
+#### **Step 2: Update Environment**
+
+```
+1. Go to "ListService Dev" environment
+2. Set API_KEY variable to the output value
+3. Save environment
+```
+
+#### **Step 3: Enable API Key Header**
+
+```
+1. Open any request (HEAD or TAIL)
+2. Go to "Headers" tab
+3. Find "x-api-key" header
+4. Check the checkbox to enable it
+5. The value {{API_KEY}} will use your environment variable
+```
+
+**Note:** HTTP API v2 (default) does NOT require API key. Only enable this for REST API v1.
+
+---
+
+### **📊 Viewing Response Details**
+
+Postman shows comprehensive response information:
+
+#### **Response Body**
+```json
+{
+  "result": ["a", "b"]
+}
+```
+
+#### **Status**
+- ✅ `200 OK` - Success
+- ❌ `400 Bad Request` - Validation error
+- ❌ `404 Not Found` - Wrong endpoint
+- ❌ `405 Method Not Allowed` - Wrong HTTP method
+- ❌ `500 Internal Server Error` - Server error
+
+#### **Headers**
+```
+content-type: application/json
+content-length: 20
+date: Wed, 02 Oct 2025 21:30:00 GMT
+x-amzn-requestid: abc-123-def-456
+```
+
+#### **Response Time**
+- Typical: 50-200 ms
+- Cold start (first request): 500-1000 ms
+
+#### **Response Size**
+- Typical: < 1 KB
+- Depends on result list size
+
+---
+
+### **💾 Saving Test Results**
+
+#### **Create a Test Suite**
+
+Add tests to automatically verify responses:
+
+```javascript
+// In "Tests" tab of request:
+
+// Test 1: Status code is 200
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+// Test 2: Response has result property
+pm.test("Response has result", function () {
+    var jsonData = pm.response.json();
+    pm.expect(jsonData).to.have.property('result');
+});
+
+// Test 3: Result is an array
+pm.test("Result is an array", function () {
+    var jsonData = pm.response.json();
+    pm.expect(jsonData.result).to.be.an('array');
+});
+
+// Test 4: Result has correct length
+pm.test("Result length matches n", function () {
+    var jsonData = pm.response.json();
+    var requestBody = JSON.parse(pm.request.body.raw);
+    var expectedLength = Math.min(requestBody.n, requestBody.list.length);
+    pm.expect(jsonData.result.length).to.eql(expectedLength);
+});
+```
+
+#### **Run Collection with Tests**
+
+```
+1. Right-click collection "ListService API"
+2. Select "Run collection"
+3. Click "Run ListService API"
+4. See test results:
+   - ✅ Tests passed
+   - ❌ Tests failed
+   - Response times
+   - Pass percentage
+```
+
+---
+
+### **🌍 Multiple Environments**
+
+Create different environments for each deployment:
+
+#### **Dev Environment**
+```
+Name: ListService Dev
+BASE_URL: https://YOUR_DEV_API.execute-api.eu-north-1.amazonaws.com/dev
+API_KEY: (empty or dev key)
+```
+
+#### **Staging Environment**
+```
+Name: ListService Staging
+BASE_URL: https://YOUR_STAGING_API.execute-api.eu-north-1.amazonaws.com/stage
+API_KEY: (empty or staging key)
+```
+
+#### **Production Environment**
+```
+Name: ListService Production
+BASE_URL: https://YOUR_PROD_API.execute-api.eu-north-1.amazonaws.com/prod
+API_KEY: (empty or prod key)
+```
+
+**Switch between environments** using the dropdown (top right).
+
+---
+
+### **🔄 Collection Runner (Automated Testing)**
+
+Run all requests sequentially:
+
+```
+1. Click "ListService API" collection
+2. Click "Run" button
+3. Configure:
+   - Iterations: 1 (or more for load testing)
+   - Delay: 0ms (or add delay between requests)
+   - Data file: (optional CSV/JSON for data-driven tests)
+4. Click "Run ListService API"
+```
+
+**Results show:**
+- ✅ Passed requests
+- ❌ Failed requests
+- Total time
+- Average response time
+- Test results
+
+---
+
+### **📈 Load Testing (Performance)**
+
+Test how the API handles multiple requests:
+
+```
+1. Open Collection Runner
+2. Set iterations: 100
+3. Set delay: 10ms
+4. Run collection
+```
+
+**Metrics to watch:**
+- Average response time
+- Max response time
+- Success rate (should be 100%)
+- Errors (should be 0)
+
+**Expected Performance:**
+- HTTP API (no cold start): 50-150ms
+- HTTP API (cold start): 500-1000ms
+- Throttle limits: 25 req/s, burst 50
+
+---
+
+### **🐛 Debugging Failed Requests**
+
+#### **Issue: "Could not get response"**
+
+**Causes:**
+- BASE_URL not set or incorrect
+- No internet connection
+- API Gateway endpoint doesn't exist
+
+**Solution:**
+```bash
+# Verify endpoint exists
+cd infra
+terraform output api_endpoint
+
+# Test with curl
+curl -X POST "$API_ENDPOINT/v1/list/head" \
+  -H "Content-Type: application/json" \
+  -d '{"list":["a","b"],"n":1}'
+```
+
+#### **Issue: "404 Not Found"**
+
+**Causes:**
+- Wrong URL path
+- Wrong environment selected
+
+**Solution:**
+- Check URL: Should end with `/v1/list/head` or `/v1/list/tail`
+- Verify BASE_URL doesn't include the path
+- Correct: `https://abc123.execute-api.eu-north-1.amazonaws.com/dev`
+- Wrong: `https://abc123.execute-api.eu-north-1.amazonaws.com/dev/v1/list/head`
+
+#### **Issue: "400 Bad Request"**
+
+**Causes:**
+- Invalid JSON in body
+- Missing required fields
+- Invalid data types
+
+**Solution:**
+- Check JSON syntax (use Postman's "Beautify" button)
+- Ensure "list" is an array of strings
+- Ensure "n" is a positive integer
+- Check request body format
+
+#### **Issue: "403 Forbidden"**
+
+**Causes:**
+- API Key required but not provided
+- Invalid API Key
+
+**Solution:**
+- Check if REST API requires API key
+- Enable x-api-key header
+- Verify API_KEY environment variable is set
+- Get fresh API key: `terraform output api_key_value`
+
+---
+
+### **💡 Pro Tips**
+
+#### **1. Save to Workspace**
+Save collection to a Team Workspace to share with your team.
+
+#### **2. Document Requests**
+Add descriptions to each request:
+```
+Request: HEAD
+Description: Returns the first n elements from a list.
+Example: {"list":["a","b","c"],"n":2} → {"result":["a","b"]}
+```
+
+#### **3. Pre-request Scripts**
+Generate dynamic data:
+```javascript
+// Generate random list
+const list = Array.from({length: 5}, () => 
+    Math.random().toString(36).substring(7)
+);
+pm.variables.set("randomList", JSON.stringify(list));
+
+// Use in body: {"list": {{randomList}}, "n": 2}
+```
+
+#### **4. Chain Requests**
+Use response from one request in another:
+```javascript
+// In Tests tab of first request:
+var jsonData = pm.response.json();
+pm.environment.set("lastResult", JSON.stringify(jsonData.result));
+
+// In body of second request: {"list": {{lastResult}}, "n": 1}
+```
+
+#### **5. Export Collection**
+Share with teammates:
+```
+1. Right-click collection
+2. Select "Export"
+3. Choose "Collection v2.1"
+4. Save as JSON
+5. Share file or commit to Git
+```
+
+---
+
+### **📚 Additional Resources**
+
+- **Postman Learning Center**: https://learning.postman.com/
+- **Postman Collections**: https://www.postman.com/collection/
+- **Postman Variables**: https://learning.postman.com/docs/sending-requests/variables/
+- **Postman Tests**: https://learning.postman.com/docs/writing-scripts/test-scripts/
+
+---
+
+### **🎯 Quick Commands Summary**
+
+| Action | Steps |
+|--------|-------|
+| **Import Collection** | Import → Upload Files → `postman_collection.json` |
+| **Set Environment** | Environments → + → Add `BASE_URL` variable |
+| **Test HEAD** | Open "Head" request → Send |
+| **Test TAIL** | Open "Tail" request → Send |
+| **Run All Tests** | Collection → Run → Run ListService API |
+| **Enable API Key** | Request → Headers → Check `x-api-key` |
+| **Switch Env** | Dropdown (top right) → Select environment |
+
+---
+
 ### **Quick Reference: Build Commands**
 
 **Windows (PowerShell):**

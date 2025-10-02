@@ -74,7 +74,7 @@
   "variable": [
     {
       "key": "BASE_URL",
-      "value": "https://YOUR_API.execute-api.eu-north-1.amazonaws.com/dev"
+      "value": "https://uvynvd8xfe.execute-api.eu-north-1.amazonaws.com/dev"
     },
     {
       "key": "API_KEY",
