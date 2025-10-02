@@ -10,6 +10,70 @@
 
 ---
 
+## 📑 **Table of Contents**
+
+### **🎖️ Requirements & Overview**
+- [🎖️ Requirements Compliance](#️-requirements-compliance)
+- [📖 What is ListService?](#-what-is-listservice)
+- [🎯 Project Highlights](#-project-highlights)
+
+### **🚀 Getting Started**
+- [🚀 Quick Start](#-quick-start)
+- [🚀 How to Deploy This to Your Own AWS Account](#-how-to-deploy-this-to-your-own-aws-account)
+- [✅ Pre-Deployment Checklist](#-pre-deployment-checklist)
+- [🎯 Next Steps - Ready to Deploy!](#-next-steps---ready-to-deploy)
+
+### **📚 Testing & Documentation**
+- [📚 Example: Testing the Live Deployment](#-example-testing-the-live-deployment)
+- [📖 Understanding the API](#-understanding-the-api)
+- [📮 Testing with Postman](#-testing-with-postman)
+- [📚 Interactive API Documentation (Redoc)](#-interactive-api-documentation-redoc)
+- [🧪 Testing](#-testing)
+- [API Documentation & Clients](#api-documentation--clients)
+- [Example curl scripts](#example-curl-scripts)
+
+### **🔄 CI/CD & Automation**
+- [🔄 CI/CD Pipeline with GitHub Actions](#-cicd-pipeline-with-github-actions)
+- [🔄 Complete CI/CD Flow Example](#-complete-cicd-flow-example)
+- [📊 Workflow Status Badges](#-workflow-status-badges)
+- [🛡️ Branch Protection Rules (Recommended)](#️-branch-protection-rules-recommended)
+- [🔧 Workflow Customization](#-workflow-customization)
+- [📈 Monitoring Workflow Health](#-monitoring-workflow-health)
+- [🎯 CI/CD Best Practices Used](#-cicd-best-practices-used)
+- [🚀 Getting Started with CI/CD](#-getting-started-with-cicd)
+- [💡 Troubleshooting CI/CD](#-troubleshooting-cicd)
+- [GitHub Actions: Deploy Pipeline](#github-actions-deploy-pipeline)
+- [GitHub Actions: matrix deploy](#github-actions-matrix-deploy)
+
+### **🏗️ Architecture & Configuration**
+- [Architecture Diagram](#architecture-diagram)
+- [Architecture (Mermaid)](#architecture-mermaid)
+- [📁 Project Structure](#-project-structure)
+- [Security Enhancements (optional, configurable via Terraform vars)](#security-enhancements-optional-configurable-via-terraform-vars)
+- [Public vs Protected Routes (JWT)](#public-vs-protected-routes-jwt)
+- [REST API v1 (API Keys + Usage Plans)](#rest-api-v1-api-keys--usage-plans)
+- [REST API v1: WAF & per-method throttling](#rest-api-v1-waf--per-method-throttling)
+- [Environment tfvars](#environment-tfvars)
+- [OpenAPI: single-file HTML](#openapi-single-file-html)
+- [Professional defaults & workflows](#professional-defaults--workflows)
+
+### **🔧 Operations & Maintenance**
+- [🔧 Recent Improvements](#-recent-improvements)
+- [🔍 Troubleshooting](#-troubleshooting)
+- [💰 AWS Cost Estimate](#-aws-cost-estimate)
+
+### **📖 Reference & Support**
+- [📚 Additional Resources](#-additional-resources)
+- [📝 License](#-license)
+- [🤝 Contributing](#-contributing)
+- [📧 Support](#-support)
+
+### **✅ Compliance & Validation**
+- [🔍 Requirements Validation Report](#-requirements-validation-report)
+- [📊 Final Compliance Report](#-final-compliance-report)
+
+---
+
 ## 🎖️ **Requirements Compliance**
 
 This project is a **complete implementation** of the following requirements specification:
