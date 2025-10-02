@@ -1553,19 +1553,22 @@ These allow you to quickly bootstrap the backend and add test users to Cognito.
 
 ```mermaid
 flowchart LR
-  client[Client (curl / Postman / Frontend)]
-  waf[WAFv2 \n (AWS Managed Rules, Allowlist, Bot Control)]
-  apigw[API Gateway \n HTTP API v2]
-  lambda[Lambda \n handler.py (Python 3.12)]
-  cw[CloudWatch \n Logs + Alarms]
-  xray[X-Ray]
-  cognito[Cognito \n User Pool / JWT Authorizer]
-  sns[SNS \n Notifications]
+  client["Client<br/>(curl, Postman, Browser)"]
+  waf["WAFv2<br/>(AWS Managed Rules, Allowlist, Bot Control)"]
+  apigw["API Gateway<br/>HTTP API v2"]
+  lambda["Lambda Function<br/>handler.py Python 3.12"]
+  cw["CloudWatch<br/>Logs + Alarms"]
+  xray["X-Ray<br/>Tracing"]
+  cognito["Cognito<br/>User Pool + JWT Authorizer"]
+  sns["SNS<br/>Notifications"]
 
-  client --> waf --> apigw --> lambda
-  apigw -. JWT .-> cognito
-  lambda --> cw --> sns
-  lambda --> xray
+  client --> waf
+  waf --> apigw
+  apigw --> lambda
+  apigw -.JWT Auth.-> cognito
+  lambda --> cw
+  cw --> sns
+  lambda -.Tracing.-> xray
 ```
 
 ---
