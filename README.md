@@ -1757,11 +1757,38 @@ The Redoc documentation provides:
 
 #### **When OpenAPI Spec Changes:**
 
-**If using `index.html` (recommended):**
+⚠️ **Important: Keep Files in Sync!**
+
+OpenAPI spec exists in **two locations**:
+- `openapi.yaml` (root) - Source of truth
+- `docs/openapi.yaml` (copy) - For GitHub Pages
+
+**When you update the spec:**
+
+```powershell
+# 1. Edit the root openapi.yaml
+# 2. Copy to docs folder
+copy openapi.yaml docs\openapi.yaml
+
+# 3. Commit both files
+git add openapi.yaml docs/openapi.yaml
+git commit -m "docs: Update OpenAPI spec"
+git push
+```
+
+**For Unix/Linux/Mac:**
 ```bash
-# Just edit openapi.yaml
+cp openapi.yaml docs/openapi.yaml
+git add openapi.yaml docs/openapi.yaml
+git commit -m "docs: Update OpenAPI spec"
+git push
+```
+
+**If using `index.html` locally:**
+```bash
+# Just edit openapi.yaml in root
 # Changes appear automatically when you refresh browser
-# No rebuild needed!
+# No rebuild needed for local development!
 ```
 
 **If using `openapi_standalone.html`:**
@@ -2074,7 +2101,7 @@ x-codeSamples:
 | **View Docs Locally** | `python -m http.server -d docs 8080` |
 | **Open Standalone** | `start docs\openapi_standalone.html` (Windows) |
 | **View Live** | https://teurajarvi.github.io/listservice/ |
-| **Update Spec** | Edit `openapi.yaml` (auto-updates `index.html`) |
+| **Update Spec** | Edit `openapi.yaml` + `copy openapi.yaml docs\` |
 | **Test Changes** | Refresh browser (Ctrl+Shift+R) |
 | **Share Docs** | Send `openapi_standalone.html` file |
 
