@@ -1,0 +1,9 @@
+# Example tfvars for convenience
+region = "eu-north-1"
+project_name = "listservice"
+stage = "dev"
+log_level = "INFO"
+enable_xray = true
+
+# http_api module vars mapped via infra/main.tf; for WAF options use module variables if exposed
+# alarm_email = "you@example.com"

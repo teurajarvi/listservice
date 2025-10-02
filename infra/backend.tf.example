@@ -1,0 +1,10 @@
+# Copy this to backend.tf and replace placeholders OR generate via scripts/init_backend.sh
+terraform {
+  backend "s3" {
+    bucket         = "REPLACE_ME_STATE_BUCKET"
+    key            = "listservice/terraform.tfstate"
+    region         = "REPLACE_ME_REGION"
+    dynamodb_table = "REPLACE_ME_LOCK_TABLE"
+    encrypt        = true
+  }
+}

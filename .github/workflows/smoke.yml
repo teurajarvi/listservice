@@ -1,0 +1,49 @@
+name: Smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find endpoint from Terraform outputs
+        id: endpoint
+        run: |
+          set -e
+          EP_HTTP=$(terraform -chdir=infra output -raw api_endpoint 2>/dev/null || echo "")
+          EP_REST=$(terraform -chdir=infra output -raw rest_invoke_url 2>/dev/null || echo "")
+          if [ -n "$EP_HTTP" ]; then
+            echo "endpoint=$EP_HTTP" >> $GITHUB_OUTPUT
+            echo "auth_header=" >> $GITHUB_OUTPUT
+          elif [ -n "$EP_REST" ]; then
+            echo "endpoint=$EP_REST" >> $GITHUB_OUTPUT
+            KEY=$(terraform -chdir=infra output -raw api_key_value 2>/dev/null || echo "")
+            echo "auth_header=x-api-key: $KEY" >> $GITHUB_OUTPUT
+          else
+            echo "No endpoint found in Terraform outputs" >&2
+            exit 1
+          fi
+          echo "Using endpoint: $(cat $GITHUB_OUTPUT)"
+
+      - name: Smoke - head
+        run: |
+          EP="${{ steps.endpoint.outputs.endpoint }}"
+          HDR="${{ steps.endpoint.outputs.auth_header }}"
+          if [ -n "$HDR" ]; then
+            curl -s -X POST "$EP/v1/list/head" -H "Content-Type: application/json" -H "$HDR" -d '{"list":["a","b","c"],"n":2}' | jq .
+          else
+            curl -s -X POST "$EP/v1/list/head" -H "Content-Type: application/json" -d '{"list":["a","b","c"],"n":2}' | jq .
+          fi
+
+      - name: Smoke - tail
+        run: |
+          EP="${{ steps.endpoint.outputs.endpoint }}"
+          HDR="${{ steps.endpoint.outputs.auth_header }}"
+          if [ -n "$HDR" ]; then
+            curl -s -X POST "$EP/v1/list/tail" -H "Content-Type: application/json" -H "$HDR" -d '{"list":["a","b","c"],"n":2}' | jq .
+          else
+            curl -s -X POST "$EP/v1/list/tail" -H "Content-Type: application/json" -d '{"list":["a","b","c"],"n":2}' | jq .
+          fi

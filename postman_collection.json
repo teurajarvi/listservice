@@ -1,0 +1,84 @@
+{
+  "info": {
+    "name": "ListService API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "8c1c0f20-0000-0000-0000-listservice"
+  },
+  "item": [
+    {
+      "name": "Head",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{API_KEY}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/v1/list/head",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "v1",
+            "list",
+            "head"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"list\": [\"a\", \"b\", \"c\"], \"n\": 2}"
+        }
+      }
+    },
+    {
+      "name": "Tail",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{API_KEY}}",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/v1/list/tail",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "v1",
+            "list",
+            "tail"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"list\": [\"a\", \"b\", \"c\"], \"n\": 2}"
+        }
+      }
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "https://YOUR_API.execute-api.eu-north-1.amazonaws.com/dev"
+    },
+    {
+      "key": "API_KEY",
+      "value": ""
+    }
+  ]
+}

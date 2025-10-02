@@ -1,0 +1,52 @@
+name: PR Plan
+
+on:
+  pull_request:
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python & build lambda
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install -U pytest
+          make test
+          make package
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - name: Terraform Init
+        working-directory: infra
+        run: terraform init -backend=false
+
+      - name: Terraform Plan (dev tfvars by default)
+        id: plan
+        working-directory: infra
+        run: |
+          terraform plan -no-color -input=false             -var-file="env/dev.tfvars"             -var "lambda_package_path=../build/listservice.zip"             | tee plan.txt
+          echo "PLAN<<EOF" >> $GITHUB_OUTPUT
+          sed -e 's/`/\`/g' -e 's/${/{/g' plan.txt | head -c 60000 >> $GITHUB_OUTPUT
+          echo EOF >> $GITHUB_OUTPUT
+
+      - name: Comment PR with plan
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `### Terraform Plan (dev)\n\n\`\`\`\n${{ steps.plan.outputs.PLAN }}\n\`\`\``;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })

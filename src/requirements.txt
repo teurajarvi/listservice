@@ -1,0 +1,5 @@
+# Lambda dependencies
+# Currently no external dependencies needed - using only Python standard library
+# Add packages here as needed, e.g.:
+# boto3==1.34.0
+# requests==2.31.0
