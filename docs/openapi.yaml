@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: Serverless API for head/tail operations on lists of strings.
 servers:
-  - url: https://YOUR_API.execute-api.eu-north-1.amazonaws.com/dev
+  - url: https://uvynvd8xfe.execute-api.eu-north-1.amazonaws.com/dev
 paths:
   /v1/list/head:
     post:
