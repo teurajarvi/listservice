@@ -1,7 +1,7 @@
 # ListService (Serverless, AWS, Terraform, Python)
 
 [![CI](https://github.com/teurajarvi/listservice/actions/workflows/ci.yml/badge.svg)](https://github.com/teurajarvi/listservice/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-17%20unit%20%2B%2021%20integration-brightgreen)](src/tests/)
+[![Tests](https://img.shields.io/badge/tests-19%20unit%20%2B%2021%20integration-brightgreen)](src/tests/)
 [![Terraform](https://img.shields.io/badge/terraform-validated-purple)](infra/)
 [![AWS](https://img.shields.io/badge/AWS-Lambda%20%7C%20API%20Gateway-orange)](https://aws.amazon.com/)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org/)
@@ -94,7 +94,7 @@ This project is a **complete implementation** of the following requirements spec
 ### 🎯 **Overall Compliance: 100%**
 
 **All requirements met and exceeded.** This implementation includes additional production-ready features:
-- 38 automated tests (17 unit + 21 integration, all passing)
+- 40 automated tests (19 unit + 21 integration, all passing)
 - CI/CD pipelines (4 GitHub Actions workflows: CI, PR Plan, Deploy, Smoke)
 - Multi-environment support (dev/staging/prod)
 - Comprehensive monitoring (CloudWatch Dashboard + Alarms)
@@ -117,7 +117,7 @@ This project is a **complete implementation** of the following requirements spec
 This project demonstrates **modern cloud-native development best practices**:
 - ✅ **Serverless architecture** - No servers to manage, pay only for what you use
 - ✅ **Infrastructure as Code** - Entire infrastructure defined in Terraform
-- ✅ **Automated testing** - 38 comprehensive test cases (17 unit + 21 integration)
+- ✅ **Automated testing** - 40 comprehensive test cases (19 unit + 21 integration)
 - ✅ **Production-ready** - Includes monitoring, alarms, logging, and throttling
 - ✅ **Well-documented** - Complete guide from zero to deployed API
 
@@ -144,7 +144,7 @@ By deploying and studying this project, you'll learn:
 This repository contains the **complete, production-ready implementation** including:
 - **Python 3.12 Lambda function** with payload validation, security headers, and error handling
 - **8 Terraform infrastructure modules** (Lambda, API Gateway, Dashboard, Secrets, Alarms, and more)
-- **38 automated tests** covering all edge cases (17 unit + 21 integration)
+- **40 automated tests** covering all edge cases (19 unit + 21 integration)
 - **OpenAPI 3.0 specification** with complete API documentation
 - **CloudWatch Dashboard** with 8 monitoring widgets
 - **Secrets Manager** for secure API key storage
@@ -167,7 +167,7 @@ git clone https://github.com/teurajarvi/listservice.git
 cd listservice
 
 # Test & Build
-pytest src/tests/ -v                    # 17 unit tests pass
+pytest src/tests/ -v                    # 19 unit tests pass
 python scripts/build_zip.py             # Creates build/listservice.zip
 
 # Deploy
@@ -213,7 +213,7 @@ aws secretsmanager get-secret-value --secret-id listservice-dev-api-key \
 ### **Current Deployment Status**
 
 > **✅ Infrastructure**: Deployed to AWS `eu-north-1`  
-> **✅ Tests**: 17/17 unit tests + 21 integration tests passing  
+> **✅ Tests**: 19/19 unit tests + 21 integration tests passing  
 > **✅ API Endpoint**: `https://uvynvd8xfe.execute-api.eu-north-1.amazonaws.com/dev`  
 > **✅ Security**: Payload limits, restricted IAM, security headers, secrets management  
 > **✅ Monitoring**: CloudWatch Dashboard + Alarms active  
@@ -268,7 +268,7 @@ ls
 
 # Run unit tests to verify everything works
 python -m pytest src/tests/test_handler.py -v
-# All 17 unit tests should pass ✅
+# All 19 unit tests should pass ✅
 ```
 
 **What this does**: Downloads the project and verifies the code works on your machine before deploying to AWS.
@@ -1274,7 +1274,7 @@ curl -X POST "https://YOUR_API.execute-api.eu-north-1.amazonaws.com/dev/v1/list/
 - [x] **Terraform 1.6+** installed and in PATH  
 - [x] **pytest** installed (`pip install pytest`)
 - [x] **Lambda package built** (`python scripts/build_zip.py`)
-- [x] **Tests passing** (17/17 unit tests + 21 integration tests pass)
+- [x] **Tests passing** (19/19 unit tests + 21 integration tests pass)
 - [x] **Terraform initialized** (`terraform init`)
 - [x] **Terraform validated** (`terraform validate` ✅ Success!)
 - [x] **AWS CLI** installed and configured (`aws configure`)
@@ -2431,7 +2431,7 @@ listservice/
 │   ├── handler.py          # Lambda handler (main logic)
 │   ├── requirements.txt    # Python dependencies (empty for now)
 │   └── tests/
-│       └── test_handler.py # Unit tests (17 tests)
+│       └── test_handler.py # Unit tests (19 tests)
 │       └── integration/
 │           ├── test_api_integration.py # Integration tests (21 tests)
 │           └── README.md              # Integration test guide
@@ -2493,13 +2493,15 @@ listservice/
 
 ### 🧪 Testing & Quality Assurance
 
-**Unit Tests** (17 tests):
+**Unit Tests** (19 tests):
 - All core operations (head, tail)
 - Edge cases (empty lists, n > length, n = 0)
 - Error handling (invalid inputs, negative n)
 - Payload validation (oversized lists, long strings, large bodies)
 - Security headers verification
 - Case-insensitive routing
+- Exception handling (unhandled errors)
+- Security headers completeness
 
 **Integration Tests** (21 tests):
 - Live API endpoint testing
@@ -2509,7 +2511,7 @@ listservice/
 - Concurrent request handling
 - Rate limiting behavior
 
-**Total: 38 automated tests, 100% passing**
+**Total: 40 automated tests, 100% passing**
 
 ### 🏗️ Infrastructure
 
@@ -2561,7 +2563,7 @@ This project includes a **comprehensive CI/CD pipeline** using GitHub Actions. F
 ✅ Checkout code
 ✅ Setup Python 3.12
 ✅ Install pytest
-✅ Run all 17 unit tests
+✅ Run all 19 unit tests
 ✅ Build Lambda deployment package
 ✅ Setup Terraform 1.9.5
 ✅ Check Terraform formatting
@@ -2575,7 +2577,7 @@ This project includes a **comprehensive CI/CD pipeline** using GitHub Actions. F
 
 #### **Purpose:**
 **Quality Gate** - Ensures code quality before merge:
-- All tests must pass (17/17 unit tests)
+- All tests must pass (19/19 unit tests)
 - Lambda package must build successfully
 - Terraform code must be properly formatted
 - Terraform configuration must be valid
@@ -2891,7 +2893,7 @@ Step 2: Create Pull Request
 ├─ Push branch: git push origin feature/new-operation
 ├─ Open Pull Request on GitHub
 ├─ 🧪 CI Workflow runs automatically
-│  ├─ Runs 17 unit tests ✅
+│  ├─ Runs 19 unit tests ✅
 │  ├─ Builds Lambda package ✅
 │  └─ Validates Terraform ✅
 ├─ 📋 PR Plan Workflow runs automatically
@@ -3058,7 +3060,7 @@ This pipeline demonstrates industry best practices:
 ```powershell
 # Run unit tests
 python -m pytest src/tests/test_handler.py -v
-# All 17 tests should pass
+# All 19 tests should pass
 
 # Run integration tests (requires deployed API)
 export API_ENDPOINT="https://your-api.execute-api.region.amazonaws.com/dev"
@@ -3730,7 +3732,7 @@ CloudWatch Alarms → SNS (Notifications)
 |---|-------------|--------|----------------------|-------|
 | 1 | Tech Stack: AWS + Python | ✅ **PASS** | **Excellent** | 8 AWS services, Python 3.12, type hints, error handling |
 | 2 | Infrastructure as Code: Terraform | ✅ **PASS** | **Excellent** | 8 modules, multi-env, ~25 resources, validated |
-| 3 | Application: head & tail API | ✅ **PASS** | **Excellent** | Both operations working, 38 tests (17+21), live deployment |
+| 3 | Application: head & tail API | ✅ **PASS** | **Excellent** | Both operations working, 40 tests (19+21), live deployment |
 | 4 | Architecture: Serverless | ✅ **PASS** | **Excellent** | 100% serverless, no servers, auto-scaling |
 | 5 | Documentation | ✅ **PASS** | **Excellent** | 1400+ lines, OpenAPI spec, beginner-friendly |
 
