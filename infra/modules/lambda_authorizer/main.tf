@@ -4,31 +4,34 @@ resource "aws_iam_role" "auth_exec" {
     Version = "2012-10-17",
     Statement = [{
       Action    = "sts:AssumeRole",
-      Principal = { Service = "lambda.amazonaws.com" },
       Effect    = "Allow"
     }]
   })
 }
 
-resource "aws_iam_role_policy" "auth_logs" {
-  name = "${var.project_name}-${var.stage}-auth-logs"
+resource "aws_iam_role_policy" "logs" {
+  name = "${var.project_name}-${var.stage}-authorizer-logs"
   role = aws_iam_role.auth_exec.id
   policy = jsonencode({
-    Version = "2012-10-17",
+    Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow",
+      Effect = "Allow"
       Action = [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      Resource = "*"
+      # Restrict to only this authorizer function's log group
+      Resource = [
+        "arn:aws:logs:*:*:log-group:/aws/lambda/${var.project_name}-${var.stage}-authorizer",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/${var.project_name}-${var.stage}-authorizer:*"
+      ]
     }]
   })
 }
 
 resource "aws_cloudwatch_log_group" "auth" {
-  name              = "/aws/lambda/${var.project_name}-${var.stage}-auth"
+  name              = "/aws/lambda/${var.project_name}-${var.stage}-authorizer"
   retention_in_days = 14
 }
 

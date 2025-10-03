@@ -43,6 +43,23 @@ module "alarms" {
   alarm_email = var.alarm_email
 }
 
+# CloudWatch Dashboard for monitoring
+module "dashboard" {
+  source               = "./modules/dashboard"
+  project_name         = var.project_name
+  stage                = var.stage
+  region               = var.region
+  lambda_function_name = module.lambda.function_name
+  api_id               = module.http_api.api_id
+}
+
+# Secrets Manager for API keys and sensitive data
+module "secrets" {
+  source       = "./modules/secrets"
+  project_name = var.project_name
+  stage        = var.stage
+}
+
 
 # Optional REST API v1 with API Keys + Usage Plan
 # module "rest_api" {

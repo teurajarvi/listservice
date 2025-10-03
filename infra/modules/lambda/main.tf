@@ -23,12 +23,28 @@ resource "aws_iam_role_policy" "lambda_logs" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        Resource = "*"
+        # Restrict to only this Lambda function's log group
+        Resource = [
+          "arn:aws:logs:*:*:log-group:/aws/lambda/${var.project_name}-${var.stage}-handler",
+          "arn:aws:logs:*:*:log-group:/aws/lambda/${var.project_name}-${var.stage}-handler:*"
+        ]
       },
       {
-        Effect   = "Allow",
-        Action   = ["ssm:GetParameter", "ssm:GetParameters"],
-        Resource = "*"
+        Effect = "Allow",
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ],
+        # Restrict to only this project's SSM parameters
+        Resource = "arn:aws:ssm:*:*:parameter/${var.project_name}/${var.stage}/*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ],
+        # Allow Lambda to read secrets for this project/stage
+        Resource = "arn:aws:secretsmanager:*:*:secret:${var.project_name}-${var.stage}-*"
       }
     ]
   })

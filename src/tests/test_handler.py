@@ -184,3 +184,37 @@ def test_case_insensitive_path():
     body = json.loads(r["body"])
     assert r["statusCode"] == 200
     assert body["result"] == ["a"]
+
+
+def test_list_too_long():
+    """Test that list exceeding MAX_LIST_LENGTH is rejected"""
+    too_long_list = [f"item-{i}" for i in range(10001)]
+    e = _event("/v1/list/head", {"list": too_long_list, "n": 1})
+    r = handler.lambda_handler(e, None)
+    assert r["statusCode"] == 400
+    body = json.loads(r["body"])
+    assert "10000" in body["error"]
+
+
+def test_string_too_long():
+    """Test that strings exceeding MAX_STRING_LENGTH are rejected"""
+    long_string = "a" * 1001  # Exceeds MAX_STRING_LENGTH of 1000
+    e = _event("/v1/list/head", {"list": [long_string], "n": 1})
+    r = handler.lambda_handler(e, None)
+    assert r["statusCode"] == 400
+    body = json.loads(r["body"])
+    assert "max length" in body["error"].lower()
+
+
+def test_body_too_large():
+    """Test that request body exceeding MAX_BODY_SIZE is rejected"""
+    # Create a large list to exceed 1 MB
+    large_list = ["x" * 1000 for _ in range(2000)]  # ~2 MB of data
+    event = {
+        "requestContext": {"http": {"path": "/v1/list/head", "method": "POST"}},
+        "body": json.dumps({"list": large_list, "n": 1}),
+    }
+    r = handler.lambda_handler(event, None)
+    assert r["statusCode"] == 400
+    body = json.loads(r["body"])
+    assert "too large" in body["error"].lower()
