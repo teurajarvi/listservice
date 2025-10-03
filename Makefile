@@ -9,7 +9,13 @@ clean:
 	rm -rf build
 
 test:
-	$(PY) -m pytest -q
+	$(PY) -m pytest src/tests/test_handler.py -q
+
+test-integration:
+	$(PY) -m pytest src/tests/integration/ -v
+
+test-all:
+	$(PY) -m pytest src/tests/ -v
 
 sync-docs:
 	@echo "Syncing openapi.yaml to docs/ folder..."

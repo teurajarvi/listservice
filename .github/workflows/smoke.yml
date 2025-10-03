@@ -1,7 +1,12 @@
-name: Smoke
+name: Smoke Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      api_endpoint:
+        description: 'API Endpoint URL (optional - will auto-detect from Terraform)'
+        required: false
+        type: string
 
 jobs:
   smoke:
@@ -9,41 +14,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Find endpoint from Terraform outputs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Find API endpoint
         id: endpoint
         run: |
           set -e
-          EP_HTTP=$(terraform -chdir=infra output -raw api_endpoint 2>/dev/null || echo "")
-          EP_REST=$(terraform -chdir=infra output -raw rest_invoke_url 2>/dev/null || echo "")
-          if [ -n "$EP_HTTP" ]; then
-            echo "endpoint=$EP_HTTP" >> $GITHUB_OUTPUT
-            echo "auth_header=" >> $GITHUB_OUTPUT
-          elif [ -n "$EP_REST" ]; then
-            echo "endpoint=$EP_REST" >> $GITHUB_OUTPUT
-            KEY=$(terraform -chdir=infra output -raw api_key_value 2>/dev/null || echo "")
-            echo "auth_header=x-api-key: $KEY" >> $GITHUB_OUTPUT
+          # Use manual input if provided
+          if [ -n "${{ inputs.api_endpoint }}" ]; then
+            echo "endpoint=${{ inputs.api_endpoint }}" >> $GITHUB_OUTPUT
+            echo "Using manual endpoint: ${{ inputs.api_endpoint }}"
           else
-            echo "No endpoint found in Terraform outputs" >&2
-            exit 1
-          fi
-          echo "Using endpoint: $(cat $GITHUB_OUTPUT)"
-
-      - name: Smoke - head
-        run: |
-          EP="${{ steps.endpoint.outputs.endpoint }}"
-          HDR="${{ steps.endpoint.outputs.auth_header }}"
-          if [ -n "$HDR" ]; then
-            curl -s -X POST "$EP/v1/list/head" -H "Content-Type: application/json" -H "$HDR" -d '{"list":["a","b","c"],"n":2}' | jq .
-          else
-            curl -s -X POST "$EP/v1/list/head" -H "Content-Type: application/json" -d '{"list":["a","b","c"],"n":2}' | jq .
+            # Try to get from Terraform outputs
+            EP_HTTP=$(terraform -chdir=infra output -raw api_endpoint 2>/dev/null || echo "")
+            EP_REST=$(terraform -chdir=infra output -raw rest_invoke_url 2>/dev/null || echo "")
+            if [ -n "$EP_HTTP" ]; then
+              echo "endpoint=$EP_HTTP" >> $GITHUB_OUTPUT
+              echo "Using HTTP API endpoint: $EP_HTTP"
+            elif [ -n "$EP_REST" ]; then
+              echo "endpoint=$EP_REST" >> $GITHUB_OUTPUT
+              echo "Using REST API endpoint: $EP_REST"
+            else
+              echo "❌ No endpoint found. Please provide api_endpoint input or ensure Terraform state is accessible" >&2
+              exit 1
+            fi
           fi
 
-      - name: Smoke - tail
+      - name: Quick smoke test (curl)
         run: |
           EP="${{ steps.endpoint.outputs.endpoint }}"
-          HDR="${{ steps.endpoint.outputs.auth_header }}"
-          if [ -n "$HDR" ]; then
-            curl -s -X POST "$EP/v1/list/tail" -H "Content-Type: application/json" -H "$HDR" -d '{"list":["a","b","c"],"n":2}' | jq .
-          else
-            curl -s -X POST "$EP/v1/list/tail" -H "Content-Type: application/json" -d '{"list":["a","b","c"],"n":2}' | jq .
-          fi
+          echo "🔥 Quick smoke test to $EP/v1/list/head"
+          curl -sf -X POST "$EP/v1/list/head" \
+            -H "Content-Type: application/json" \
+            -d '{"list":["a","b","c"],"n":2}' | jq .
+
+      - name: Run integration tests (pytest)
+        env:
+          API_ENDPOINT: ${{ steps.endpoint.outputs.endpoint }}
+        run: |
+          echo "🧪 Running full integration test suite..."
+          echo "API_ENDPOINT: $API_ENDPOINT"
+          pytest src/tests/integration/ -v --tb=short
