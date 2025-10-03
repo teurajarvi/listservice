@@ -46,8 +46,7 @@
 - [GitHub Actions: matrix deploy](#github-actions-matrix-deploy)
 
 ### **🏗️ Architecture & Configuration**
-- [Architecture Diagram](#architecture-diagram)
-- [Architecture (Mermaid)](#architecture-mermaid)
+- [🏗️ Architecture Diagram](#️-architecture-diagram)
 - [📁 Project Structure](#-project-structure)
 - [Security Enhancements (optional, configurable via Terraform vars)](#security-enhancements-optional-configurable-via-terraform-vars)
 - [Public vs Protected Routes (JWT)](#public-vs-protected-routes-jwt)
@@ -1544,12 +1543,7 @@ These allow you to quickly bootstrap the backend and add test users to Cognito.
 - **API Keys** for non-production environments.
 - **Cognito seeding** script for quick test user creation.
 
-## Architecture Diagram
-
-![Architecture](architecture.png)
-
-
-## Architecture (Mermaid)
+## 🏗️ **Architecture Diagram**
 
 ```mermaid
 flowchart LR
