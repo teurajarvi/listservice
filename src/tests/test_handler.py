@@ -223,9 +223,9 @@ def test_body_too_large():
 
 def test_unhandled_exception():
     """Test that unhandled exceptions are caught and return 500"""
-    # Mock json.loads to raise an unexpected exception
-    with patch("src.handler.json.loads") as mock_loads:
-        mock_loads.side_effect = RuntimeError("Unexpected error")
+    # Mock _validate to raise an unexpected exception (not ValueError)
+    with patch("src.handler._validate") as mock_validate:
+        mock_validate.side_effect = RuntimeError("Unexpected internal error")
         
         e = _event("/v1/list/head", {"list": ["a", "b"], "n": 1})
         r = handler.lambda_handler(e, None)
