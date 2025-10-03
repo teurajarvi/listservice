@@ -1,5 +1,6 @@
 import json
 import src.handler as handler
+from unittest.mock import patch
 
 
 def _event(path: str, body: dict, method: str = "POST"):
@@ -218,3 +219,32 @@ def test_body_too_large():
     assert r["statusCode"] == 400
     body = json.loads(r["body"])
     assert "too large" in body["error"].lower()
+
+
+def test_unhandled_exception():
+    """Test that unhandled exceptions are caught and return 500"""
+    # Mock json.loads to raise an unexpected exception
+    with patch("src.handler.json.loads") as mock_loads:
+        mock_loads.side_effect = RuntimeError("Unexpected error")
+        
+        e = _event("/v1/list/head", {"list": ["a", "b"], "n": 1})
+        r = handler.lambda_handler(e, None)
+        
+        assert r["statusCode"] == 500
+        body = json.loads(r["body"])
+        assert body["code"] == "INTERNAL_ERROR"
+        assert body["error"] == "Internal Server Error"
+
+
+def test_security_headers():
+    """Test that all security headers are present in responses"""
+    e = _event("/v1/list/head", {"list": ["a", "b"], "n": 1})
+    r = handler.lambda_handler(e, None)
+    
+    headers = r.get("headers", {})
+    assert headers.get("X-Content-Type-Options") == "nosniff"
+    assert headers.get("X-Frame-Options") == "DENY"
+    assert "max-age=31536000" in headers.get("Strict-Transport-Security", "")
+    assert headers.get("Content-Security-Policy") == "default-src 'none'"
+    assert headers.get("X-XSS-Protection") == "1; mode=block"
+    assert headers.get("Content-Type") == "application/json"
